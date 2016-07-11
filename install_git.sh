@@ -2,18 +2,6 @@
 
 set -x -e -u
 
-# udevadm may not upgrade correctly
-yum remove -y udev
-
-yum update -y 
-yum groupinstall -y "Development tools" 
-yum install -y tar wget m4
-yum install -y autoconf 
-yum install -y gcc 
-yum install -y perl-ExtUtils-MakeMaker 
-yum install -y curl-devel expat-devel gettext-devel openssl-devel zlib-devel 
-yum clean all
-
 git_version="$1"
 git_sources="/gitz/src/git"
 git_bin="/gitz/bin/git"
@@ -30,13 +18,22 @@ make prefix=${git_bin} all && make prefix=${git_bin} install
 popd
 
 echo '#!/bin/bash' > ${git_sh}
-echo "GIT_EXEC_PATH=${git_bin}/libexec/git-core PATH=${git_bin}/bin:\$PATH GITPERLLIB=${git_bin}/perl/blib/lib ${git_bin}/bin/git \"\$@\"" > ${git_sh}
+echo "GIT_EXEC_PATH=${git_bin}/libexec/git-core PATH=${git_bin}/bin:\$PATH GITPERLLIB=${git_bin}/perl/blib/lib ${git_bin}/bin/git \"\$@\"" >> ${git_sh}
 chmod a+rx ${git_sh}
 
 cat ${git_sh}
 ${git_sh} --version
 
 [[ $( ${git_sh} --version ) == *${git_version}* ]]
+
+root_git=/git
+echo '#!/bin/bash' > ${root_git}
+echo "GIT_VERSION=${git_version}" >> ${root_git}
+echo "" >> ${root_git}
+cat /root/git.sh >> ${root_git}
+
+sync
+chmod a+rx ${root_git}
 
 ## cleanup
 rm -rf ${git_sources}/git.tar.gz
