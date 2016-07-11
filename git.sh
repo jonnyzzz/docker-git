@@ -3,7 +3,7 @@
 #enable debug if necessary
 set -e -x -u
 
-docker_image="jonnyzzz:docker-git:${GIT_VERSION}"
+docker_image="jonnyzzz/docker-git:${GIT_VERSION}"
 
 # processing selected env variables to pass to the docker process
 env_argz=("GIT_JB_DOCKER=1" )
