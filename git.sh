@@ -1,7 +1,9 @@
 #!/bin/bash
 
 #enable debug if necessary
-set -e -x -u
+if [[ -v JB_GIT_DEBUG ]]; then
+  set -e -x -u
+fi
 
 docker_image="jonnyzzz/docker-git:${GIT_VERSION}"
 
@@ -15,12 +17,12 @@ while read line; do
 done < <( printenv | sed -n -r 's/^((JB|GIT)[^=]+)=.*$/\1/p' )
 
 # processing actual inner docker command
-d_command="set -e -x -u; cd /build; "${env_argz[@]}" /git-call.sh $(printf " %q" "$@")"
+d_command="if [[ -v JB_GIT_DEBUG ]]; then set -e -x -u; fi; cd /build; "${env_argz[@]}" /git-cmd.sh $(printf " %q" "$@")"
 
 #precessing wrapping docker command
-command="groupadd -g "$(id -g)" build; "
-command+="useradd -d /build -g build -M -u \"$(id -u)\" -s /bin/bash build; "
+command="groupadd -g \"$(id -g)\" build || true; "
+command+="useradd -d /build -g \"$(id -g)\" -M -u \"$(id -u)\" -s /bin/bash build; "
 command+="su -l -c \"${d_command}\" build"
 
-docker run -i --rm -v $(pwd):/build -w /build "${docker_image}" /bin/bash -c "set -e -x -u; ${command}"
+docker run -i --rm -v $(pwd):/build -w /build "${docker_image}" /bin/bash -c "if [[ -v JB_GIT_DEBUG ]]; then set -e -x -u; fi;  ${command}"
 
