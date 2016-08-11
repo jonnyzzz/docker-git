@@ -36,6 +36,5 @@ sync
 chmod a+rx ${root_git}
 
 ## cleanup
-rm -rf ${git_sources}/git.tar.gz
-rm -rf ${git_sources}/git-${git_version}
+rm -rf ${git_sources}
 
